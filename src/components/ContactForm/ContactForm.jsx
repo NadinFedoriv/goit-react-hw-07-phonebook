@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
-import { getContacts } from 'redux/selectors';
-import { nanoid } from 'nanoid';
+import { addContact } from 'redux/operations';
+import { selectContacts } from 'redux/selectors';
 import { ToastContainer } from 'react-toastify';
 import { toast } from 'react-toastify';
 import './ContactForm.scss';
@@ -9,9 +8,9 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export function ContactForm() {
   const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
+  const contacts = useSelector(selectContacts);
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const name = e.target.name.value;
     const number = e.target.number.value;
@@ -21,10 +20,12 @@ export function ContactForm() {
     if (isDuplicate) {
       return toast.error(`${name} is already in contacts.`);
     }
-    const newContact = { id: nanoid(), name, number };
-    dispatch(addContact(newContact));
-
-    e.target.reset();
+    try {
+      await dispatch(addContact({ name, number }));
+      e.target.reset();
+    } catch (error) {
+      return toast.error(`Something go wrong :(`);
+    }
   };
 
   const checkDuplicateContact = name => {

@@ -4,7 +4,6 @@ import { ContactsList } from 'components/ContactsList';
 import { Filter } from 'components/Filter';
 
 export function App() {
- 
   return (
     <div className="container">
       <h1>Phonebook</h1>

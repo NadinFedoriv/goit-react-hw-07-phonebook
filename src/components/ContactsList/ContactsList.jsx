@@ -1,38 +1,48 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from 'redux/contactsSlice';
-import { getContacts } from 'redux/selectors';
-import { getFilter } from 'redux/selectors';
+import { deleteContact, fetchContacts } from 'redux/operations';
+import { selectIsLoading, selectError, selectVisiableContacts } from 'redux/selectors';
+import { Loader } from 'components/Loader';
+import { toast } from 'react-toastify';
+
 import './ContactList.scss';
+import { useEffect } from 'react';
 
 export function ContactsList() {
   const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
-  const filter = useSelector(getFilter);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
 
-  const handleDeleteContact = contactsId => {
-    dispatch(deleteContact(contactsId));
-  };
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
-  const visibleContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(filter.toLowerCase())
-  );
+   const visibleContacts = useSelector(selectVisiableContacts);   
+    
 
   return (
-    <ul className="list">
-      {visibleContacts.map(({ id, name, number }) => (
-        <li className="item" key={id}>
-          <p>
-            {name}: {number}
-          </p>
-          <button
-            className="del-button"
-            type="button"
-            onClick={() => handleDeleteContact(id)}
-          >
-            Delete
-          </button>
-        </li>
-      ))}
-    </ul>
+    <>
+      {isLoading ? (
+        <Loader />
+      ) : error ? (
+        toast.error(`Something go wrong :(`)
+      ) : (
+        <ul className="list">
+          {visibleContacts.map(({ id, name, number }) => (
+            <li className="item" key={id}>
+              <p>
+                {name}: {number}
+              </p>
+              <button
+                className="del-button"
+                type="button"
+                onClick={() => dispatch(deleteContact(id))}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
   );
 }
